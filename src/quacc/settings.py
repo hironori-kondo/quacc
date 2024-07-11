@@ -173,6 +173,7 @@ class QuaccSettings(BaseSettings):
             "fs": "fs.x",
             "postahc": "postahc.x",
             "dvscf_q2r": "dvscf_q2r.x",
+            "epw": "epw.x",
         },
         description="Name for each espresso binary.",
     )
