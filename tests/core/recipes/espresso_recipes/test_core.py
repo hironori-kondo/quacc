@@ -13,7 +13,6 @@ pytestmark = pytest.mark.skipif(
 
 from pathlib import Path
 from shutil import which
-from subprocess import CalledProcessError
 
 import pytest
 from ase.build import bulk
@@ -21,6 +20,7 @@ from ase.optimize import BFGS
 from monty.io import zopen
 from numpy.testing import assert_allclose, assert_array_equal
 
+from quacc import JobFailure
 from quacc.calculators.espresso.espresso import EspressoTemplate
 from quacc.recipes.espresso.core import (
     ase_relax_job,
@@ -220,7 +220,7 @@ def test_static_job_test_run(tmp_path, monkeypatch):
 
     assert Path("test.EXIT").exists()
 
-    with pytest.raises(CalledProcessError):
+    with pytest.raises(JobFailure, match="Calculation failed!"):
         static_job(
             atoms,
             pseudopotentials=pseudopotentials,

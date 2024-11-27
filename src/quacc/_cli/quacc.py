@@ -39,7 +39,7 @@ def callback(value: bool) -> None:
 
 @app.callback()
 def main(
-    version: Optional[bool] = Option(  # noqa: ARG001, UP007
+    version: Optional[bool] = Option(  # noqa: UP007
         None,
         "--version",
         "-v",
@@ -123,10 +123,6 @@ def unset(parameter: str) -> None:
 def info() -> None:
     """
     Print out some basic information about the quacc environment.
-
-    Parameters
-    ----------
-    None
 
     Returns
     -------

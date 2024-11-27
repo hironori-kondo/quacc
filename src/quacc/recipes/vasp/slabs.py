@@ -10,7 +10,8 @@ from quacc.recipes.vasp._base import run_and_summarize
 from quacc.wflow_tools.customizers import customize_funcs
 
 if TYPE_CHECKING:
-    from typing import Any, Callable
+    from collections.abc import Callable
+    from typing import Any
 
     from ase.atoms import Atoms
 
@@ -22,6 +23,7 @@ def static_job(
     atoms: Atoms,
     preset: str | None = "SlabSet",
     copy_files: SourceDirectory | dict[SourceDirectory, Filenames] | None = None,
+    additional_fields: dict[str, Any] | None = None,
     **calc_kwargs,
 ) -> VaspSchema:
     """
@@ -35,6 +37,8 @@ def static_job(
         Preset to use from `quacc.calculators.vasp.presets`.
     copy_files
         Files to copy (and decompress) from source to the runtime directory.
+    additional_fields
+        Additional fields to add to the results dictionary.
     **calc_kwargs
         Custom kwargs for the Vasp calculator. Set a value to
         `None` to remove a pre-existing key entirely. For a list of available
@@ -43,7 +47,7 @@ def static_job(
     Returns
     -------
     VaspSchema
-        Dictionary of results from [quacc.schemas.vasp.vasp_summarize_run][].
+        Dictionary of results from [quacc.schemas.vasp.VaspSummarize.run][].
         See the type-hint for the data structure.
     """
     calc_defaults = {
@@ -62,7 +66,7 @@ def static_job(
         preset=preset,
         calc_defaults=calc_defaults,
         calc_swaps=calc_kwargs,
-        additional_fields={"name": "VASP Slab Static"},
+        additional_fields={"name": "VASP Slab Static"} | (additional_fields or {}),
         copy_files=copy_files,
     )
 
@@ -72,6 +76,7 @@ def relax_job(
     atoms: Atoms,
     preset: str | None = "SlabSet",
     copy_files: SourceDirectory | dict[SourceDirectory, Filenames] | None = None,
+    additional_fields: dict[str, Any] | None = None,
     **calc_kwargs,
 ) -> VaspSchema:
     """
@@ -85,6 +90,8 @@ def relax_job(
         Preset to use from `quacc.calculators.vasp.presets`.
     copy_files
         Files to copy (and decompress) from source to the runtime directory.
+    additional_fields
+        Additional fields to add to the results dictionary.
     **calc_kwargs
         Custom kwargs for the Vasp calculator. Set a value to
         `None` to remove a pre-existing key entirely. For a list of available
@@ -93,7 +100,7 @@ def relax_job(
     Returns
     -------
     VaspSchema
-        Dictionary of results from [quacc.schemas.vasp.vasp_summarize_run][].
+        Dictionary of results from [quacc.schemas.vasp.VaspSummarize.run][].
         See the type-hint for the data structure.
     """
     calc_defaults = {
@@ -112,7 +119,7 @@ def relax_job(
         preset=preset,
         calc_defaults=calc_defaults,
         calc_swaps=calc_kwargs,
-        additional_fields={"name": "VASP Slab Relax"},
+        additional_fields={"name": "VASP Slab Relax"} | (additional_fields or {}),
         copy_files=copy_files,
     )
 
@@ -156,7 +163,7 @@ def bulk_to_slabs_flow(
     Returns
     -------
     list[VaspSchema]
-        List of dictionary results from [quacc.schemas.vasp.vasp_summarize_run][].
+        List of dictionary results from [quacc.schemas.vasp.VaspSummarize.run][].
         See the type-hint for the data structure.
     """
     relax_job_, static_job_ = customize_funcs(
@@ -216,7 +223,7 @@ def slab_to_ads_flow(
     Returns
     -------
     list[VaspSchema]
-        List of dictionaries of results from [quacc.schemas.vasp.vasp_summarize_run][].
+        List of dictionaries of results from [quacc.schemas.vasp.VaspSummarize.run][].
         See the type-hint for the data structure.
     """
     relax_job_, static_job_ = customize_funcs(

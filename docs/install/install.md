@@ -18,13 +18,11 @@ In your newly activated conda environment, run the following commands to install
 For the latest PyPI release:
 
 ```bash
-# Install quacc
 pip install quacc
 ```
 
 For the development version:
 
 ```bash
-# Install development version of quacc
-pip install git+https://github.com/quantum-accelerators/quacc.git
+pip install "quacc @ git+https://github.com/quantum-accelerators/quacc.git"
 ```

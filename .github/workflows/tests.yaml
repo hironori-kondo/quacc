@@ -13,11 +13,11 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python-version: ["3.9", "3.12"]
+        python-version: ["3.10", "3.12"]
         os: [ubuntu-latest, windows-latest]
         exclude:
           - os: windows-latest
-            python-version: "3.9"
+            python-version: "3.10"
 
     runs-on: ${{ matrix.os }}
     defaults:
@@ -380,7 +380,7 @@ jobs:
         uses: actions/download-artifact@v4
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         with:

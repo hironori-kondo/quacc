@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import logging
 from copy import deepcopy
+from logging import getLogger
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     from quacc.types import AdsSiteFinderKwargs, FindAdsSitesKwargs
 
 
-logger = logging.getLogger(__name__)
+LOGGER = getLogger(__name__)
 
 
 def flip_atoms(
@@ -348,7 +348,7 @@ def make_adsorbate_structures(
 
 def get_surface_energy(
     bulk: Atoms, slab: Atoms, bulk_energy: float, slab_energy: float
-) -> np.floating:
+) -> float:
     """
     Calculate the surface energy to form a given surface slab from a bulk structure. For
     asymmetric slabs, this is better thought of as the cleavage energy.
@@ -366,7 +366,7 @@ def get_surface_energy(
 
     Returns
     -------
-    np.floating
+    float
         The surface energy in eV/A^2.
     """
     alpha = len(slab) / len(bulk)

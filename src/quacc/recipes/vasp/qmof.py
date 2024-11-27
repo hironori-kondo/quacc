@@ -7,7 +7,7 @@ Reference: https://doi.org/10.1016/j.matt.2021.02.015
 
 from __future__ import annotations
 
-import logging
+from logging import getLogger
 from typing import TYPE_CHECKING
 
 from ase.optimize import BFGSLineSearch
@@ -26,7 +26,7 @@ if TYPE_CHECKING:
         VaspSchema,
     )
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = getLogger(__name__)
 
 
 @job
@@ -134,7 +134,7 @@ def _prerelax(
     Returns
     -------
     OptSchema
-        Dictionary of results from [quacc.schemas.ase.summarize_opt_run][].
+        Dictionary of results from [quacc.schemas.ase.Summarize.opt][].
         See the type-hint for the data structure.
     """
     calc_defaults = {
@@ -179,7 +179,7 @@ def _loose_relax_positions(
     Returns
     -------
     VaspSchema
-        Dictionary of results from [quacc.schemas.vasp.vasp_summarize_run][].
+        Dictionary of results from [quacc.schemas.vasp.VaspSummarize.run][].
         See the type-hint for the data structure.
     """
     calc_defaults = {
@@ -225,7 +225,7 @@ def _loose_relax_cell(
     Returns
     -------
     VaspSchema
-        Dictionary of results from [quacc.schemas.vasp.vasp_summarize_run][].
+        Dictionary of results from [quacc.schemas.vasp.VaspSummarize.run][].
         See the type-hint for the data structure.
     """
     calc_defaults = {
@@ -272,7 +272,7 @@ def _double_relax(
     Returns
     -------
     list[VaspSchema]
-        List of dictionary of results from [quacc.schemas.vasp.vasp_summarize_run][]
+        List of dictionary of results from [quacc.schemas.vasp.VaspSummarize.run][]
         See the type-hint for the data structure.
     """
     # Run first relaxation
@@ -336,7 +336,7 @@ def _static(
     Returns
     -------
     VaspSchema
-        Dictionary of results from [quacc.schemas.vasp.vasp_summarize_run][].
+        Dictionary of results from [quacc.schemas.vasp.VaspSummarize.run][].
         See the type-hint for the data structure.
     """
     calc_defaults = {

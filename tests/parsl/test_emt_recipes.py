@@ -5,12 +5,15 @@ import pytest
 parsl = pytest.importorskip("parsl")
 
 import os
+from pathlib import Path
 
 from ase.build import bulk
 
 from quacc import flow, job
 from quacc.recipes.emt.core import relax_job  # skipcq: PYL-C0412
 from quacc.recipes.emt.slabs import bulk_to_slabs_flow  # skipcq: PYL-C0412
+
+TEST_RUNINFO = Path(__file__).parent / "runinfo"
 
 
 @pytest.mark.parametrize("job_decorators", [None, {"relax_job": job()}])
@@ -62,6 +65,29 @@ def test_settings_swap(tmp_path_factory):
     assert len(os.listdir(tmp_dir1)) == 12
 
 
+def test_checkpointing():
+    import parsl
+    from parsl.utils import get_last_checkpoint
+
+    atoms = bulk("Cu")
+
+    future1 = bulk_to_slabs_flow(atoms, job_decorators={"relax_job": job(cache=True)})
+
+    future1.result()
+
+    parsl.dfk().config.checkpoint_files = get_last_checkpoint(str(TEST_RUNINFO))
+
+    future2 = bulk_to_slabs_flow(atoms, job_decorators={"relax_job": job(cache=True)})
+
+    future2.result()
+
+    lines = Path(TEST_RUNINFO, "000", "parsl.log").read_text()
+
+    assert "has memoization hash" in lines
+    assert "using result from cache" in lines
+    assert "Reusing cached result for task" in lines
+
+
 def test_settings_swap_all(tmp_path_factory):
     tmp_dir1 = tmp_path_factory.mktemp("dir1")
 
@@ -83,6 +109,7 @@ def test_settings_swap_all(tmp_path_factory):
 
 def test_phonon_flow(tmp_path, monkeypatch):
     pytest.importorskip("phonopy")
+    pytest.importorskip("seekpath")
     from quacc.recipes.emt.phonons import phonon_flow
 
     monkeypatch.chdir(tmp_path)
@@ -95,6 +122,7 @@ def test_phonon_flow(tmp_path, monkeypatch):
 
 def test_phonon_flow_multistep(tmp_path, monkeypatch):
     pytest.importorskip("phonopy")
+    pytest.importorskip("seekpath")
     from quacc.recipes.emt.phonons import phonon_flow
 
     monkeypatch.chdir(tmp_path)

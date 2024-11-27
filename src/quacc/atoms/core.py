@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-import hashlib
-import logging
 from copy import deepcopy
+from hashlib import md5
+from logging import getLogger
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -13,17 +13,18 @@ from ase.io.jsonio import encode
 from pymatgen.io.ase import AseAtomsAdaptor
 
 if TYPE_CHECKING:
+    from hashlib import _Hash
+
     from ase.atoms import Atoms
     from ase.optimize.optimize import Dynamics
     from numpy.typing import NDArray
 
-logger = logging.getLogger(__name__)
+LOGGER = getLogger(__name__)
 
 
-def get_atoms_id(atoms: Atoms) -> str:
+def _encode_atoms(atoms: Atoms) -> _Hash:
     """
-    Returns a unique ID for the Atoms object. Note: The .info dict and calculator is
-    excluded from the hash generation.
+    Returns a byte encoding for the Atoms object. Note: The .info dict and calculator is excluded.
 
     Parameters
     ----------
@@ -32,8 +33,8 @@ def get_atoms_id(atoms: Atoms) -> str:
 
     Returns
     -------
-    str
-        MD5 hash of the Atoms object
+    _Hash
+        Encoded Atoms object
     """
     atoms = copy_atoms(atoms)
     atoms.info = {}
@@ -48,7 +49,43 @@ def get_atoms_id(atoms: Atoms) -> str:
         .replace("float32", "float")
     )
 
-    return hashlib.md5(encoded_atoms.encode("utf-8"), usedforsecurity=False).hexdigest()
+    return md5(encoded_atoms.encode("utf-8"), usedforsecurity=False)
+
+
+def get_atoms_id(atoms: Atoms) -> str:
+    """
+    Get a unique identifier for an Atoms object.
+
+    Parameters
+    ----------
+    atoms
+        Atoms object
+
+    Returns
+    -------
+    str
+        Unique identifier for the Atoms object in the form of a string
+    """
+    return _encode_atoms(atoms).hexdigest()
+
+
+def get_atoms_id_parsl(atoms: Atoms, output_ref: bool = False) -> bytes:  # noqa: ARG001
+    """
+    Get a Parsl compatible unique identifier for an Atoms object.
+
+    Parameters
+    ----------
+    atoms
+        Atoms object
+    output_ref
+        Parsl specific parameter, needed for Parsl to work, unused.
+
+    Returns
+    -------
+    bytes
+        Unique identifier for the Atoms object in the form of bytes
+    """
+    return _encode_atoms(atoms).digest()
 
 
 def check_is_metal(atoms: Atoms) -> bool:
@@ -138,15 +175,24 @@ def get_spin_multiplicity_attribute(atoms: Atoms) -> int | None:
     int | None
         Spin multiplicity of the Atoms object
     """
-    return (
-        atoms.spin_multiplicity  # type: ignore[attr-defined]
-        if getattr(atoms, "spin_multiplicity", None)
-        else (
-            round(np.abs(atoms.get_initial_magnetic_moments().sum()) + 1)
-            if atoms.has("initial_magmoms")
-            else None
-        )
-    )
+    if getattr(atoms, "spin_multiplicity", None):
+        return atoms.spin_multiplicity  # type: ignore[attr-defined]
+    elif (
+        getattr(atoms, "calc", None) is not None
+        and getattr(atoms.calc, "results", None) is not None
+        and atoms.calc.results.get("magmom", None) is not None
+    ):
+        return round(abs(atoms.calc.results["magmom"])) + 1
+    elif (
+        getattr(atoms, "calc", None) is not None
+        and getattr(atoms.calc, "results", None) is not None
+        and atoms.calc.results.get("magmoms", None) is not None
+    ):
+        return round(np.abs(atoms.calc.results["magmoms"].sum())) + 1
+    elif atoms.has("initial_magmoms"):
+        return round(np.abs(atoms.get_initial_magnetic_moments().sum())) + 1
+    else:
+        return None
 
 
 def check_charge_and_spin(
@@ -154,36 +200,8 @@ def check_charge_and_spin(
 ) -> tuple[int, int]:
     """
     Check the validity of a given `charge` and `multiplicity`. If they are `None`, then
-    set the charge and/or spin multiplicity of a molecule using the following routine,
+    set the charge and/or spin multiplicity of a molecule using the information available,
     raising a `ValueError` if there is an incompatibility.
-
-    Charges:
-
-    1. If `charge` is specified, that is the charge.
-
-    2. If `atoms.charge` is present, that is the charge.
-
-    3. If `atoms.has("initial_charges")`, then
-    `atoms.get_initial_charges.sum()` is the charge.
-
-    4. If `spin_multiplicity` is set, set the charge to the smallest physically
-    possible value.
-
-    5. Otherwise, set to 0.
-
-    Spin multiplicity:
-
-    1. If `spin_multiplicity` is specified, that is the spin multiplicity.
-
-    2. If `atoms.spin_multiplicity` is present, that is the spin multiplicity.
-
-    3. If `atoms.has("initial_magmoms")`, then
-    `np.abs(atoms.get_initial_magnetic_moments().sum())+1` is the spin
-    multiplicity.
-
-    4. If none of the above, use Pymatgen to identify the lowest physically
-    possible spin multiplicity given the number of electrons and the charge, if
-    set.
 
     Parameters
     ----------
@@ -232,7 +250,7 @@ def check_charge_and_spin(
             f"Charge of {mol.charge} and spin multiplicity of {mol.spin_multiplicity} is"
             " not possible for this molecule."
         )
-    logger.debug(
+    LOGGER.debug(
         f"Setting charge to {mol.charge} and spin multiplicity to {mol.spin_multiplicity}"
     )
 

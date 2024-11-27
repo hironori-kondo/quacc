@@ -10,7 +10,8 @@ from quacc.recipes.emt.core import relax_job, static_job
 from quacc.wflow_tools.customizers import customize_funcs
 
 if TYPE_CHECKING:
-    from typing import Any, Callable
+    from collections.abc import Callable
+    from typing import Any
 
     from ase.atoms import Atoms
 
@@ -56,8 +57,8 @@ def bulk_to_slabs_flow(
     Returns
     -------
     list[RunSchema | OptSchema]
-        [RunSchema][quacc.schemas.ase.summarize_run] or
-        [OptSchema][quacc.schemas.ase.summarize_opt_run] for each slab.
+        [RunSchema][quacc.schemas.ase.Summarize.run] or
+        [OptSchema][quacc.schemas.ase.Summarize.opt] for each slab.
         See the return type-hint for the data structure.
     """
     relax_job_, static_job_ = customize_funcs(

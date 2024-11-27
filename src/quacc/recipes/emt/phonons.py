@@ -6,11 +6,12 @@ from typing import TYPE_CHECKING
 
 from quacc import flow
 from quacc.recipes.common.phonons import phonon_subflow
-from quacc.recipes.emt.core import relax_job, static_job
+from quacc.recipes.emt.core import static_job
 from quacc.wflow_tools.customizers import customize_funcs
 
 if TYPE_CHECKING:
-    from typing import Any, Callable
+    from collections.abc import Callable
+    from typing import Any
 
     from ase.atoms import Atoms
 
@@ -26,27 +27,29 @@ def phonon_flow(
         tuple[tuple[int, int, int], tuple[int, int, int], tuple[int, int, int]] | None
     ) = None,
     displacement: float = 0.01,
+    fixed_atom_indices: list[int] | None = None,
     t_step: float = 10,
     t_min: float = 0,
     t_max: float = 1000,
-    run_relax: bool = True,
     job_params: dict[str, dict[str, Any]] | None = None,
     job_decorators: dict[str, Callable | None] | None = None,
 ) -> PhononSchema:
     """
     Carry out a phonon workflow, consisting of:
 
-    1. Optional relaxation.
-        - name: "relax_job"
-        - job: [quacc.recipes.emt.core.relax_job][]
+    1. Generation of supercells.
 
-    2. Generation of supercells.
-
-    3. Static calculations on supercells
+    2. Static calculations on supercells
         - name: "static_job"
         - job: [quacc.recipes.emt.core.static_job][]
 
-    4. Calculation of thermodynamic properties.
+    3. Calculation of thermodynamic properties.
+
+    !!! Note
+
+        Phonon calculations rely on a structure that is tightly converged.
+        We suggest running a pre-relaxation with `opt_params: {"fmax": 1e-3}`
+        or tighter before running this workflow.
 
     Parameters
     ----------
@@ -61,14 +64,17 @@ def phonon_flow(
         value specified by `min_lengths`.
     displacement
         Atomic displacement (A).
+    fixed_atom_indices
+        Indices of fixed atoms. These atoms will not be displaced
+        during the phonon calculation. Useful for adsorbates on
+        surfaces with weak coupling etc. Important approximation,
+        use with caution.
     t_step
         Temperature step (K).
     t_min
         Min temperature (K).
     t_max
         Max temperature (K).
-    run_relax
-        Whether to run a relaxation beforehand.
     job_params
         Custom parameters to pass to each Job in the Flow. This is a dictionary where
         the keys are the names of the jobs and the values are dictionaries of parameters.
@@ -82,16 +88,13 @@ def phonon_flow(
         Dictionary of results from [quacc.schemas.phonons.summarize_phonopy][].
         See the return type-hint for the data structure.
     """
-    job_param_defaults = {"relax_job": {"opt_params": {"fmax": 1e-3}}}
-    relax_job_, static_job_ = customize_funcs(
-        ["relax_job", "static_job"],
-        [relax_job, static_job],
-        param_defaults=job_param_defaults,
+    static_job_ = customize_funcs(
+        ["static_job"],
+        [static_job],
+        param_defaults=None,
         param_swaps=job_params,
         decorators=job_decorators,
     )
-    if run_relax:
-        atoms = relax_job_(atoms)["atoms"]
 
     return phonon_subflow(
         atoms,
@@ -99,6 +102,7 @@ def phonon_flow(
         symprec=symprec,
         min_lengths=min_lengths,
         supercell_matrix=supercell_matrix,
+        fixed_atom_indices=fixed_atom_indices,
         displacement=displacement,
         t_step=t_step,
         t_min=t_min,
