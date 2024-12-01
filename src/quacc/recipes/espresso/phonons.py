@@ -454,8 +454,8 @@ def grid_phonon_flow(
 
         grid_results = []
         for qnum, qdata in ph_init_job_results["results"].items():
-            ph_input_data["inputph"]["start_q"] = qnum
-            ph_input_data["inputph"]["last_q"] = qnum
+            ph_input_data["inputph"]["start_q"] = int(qnum)
+            ph_input_data["inputph"]["last_q"] = int(qnum)
             repr_to_do = grid_prepare_repr(qdata["representations"], nblocks)
             files_to_copy = grid_copy_files(
                 ph_input_data, prev_outdir, qnum, qdata["qpoint"]
