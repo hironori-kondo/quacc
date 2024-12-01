@@ -91,7 +91,10 @@ def grid_copy_files(
             Path("_ph0", "pwscf.phsave", "control_ph.xml*"),
             Path("_ph0", "pwscf.phsave", "status_run.xml*"),
             Path("_ph0", "pwscf.phsave", "patterns.*.xml*"),
-            Path("_ph0", "pwscf.phsave", "tensors.xml*"),
+            *[
+                Path("_ph0", "pwscf.phsave") / path.name
+                for path in directory.joinpath("_ph0", "pwscf.phsave").glob("tensors.xml*")
+            ],
         ]
     }
 
