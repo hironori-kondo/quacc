@@ -78,7 +78,13 @@ def grid_copy_files(
     dict[SourceDirectory, Filenames]
         The dictionary of files to copy
     """
-    lqdir = ph_input_data["inputph"].get("lqdir", False)
+    lqdir = (
+        ph_input_data["inputph"].get("lqdir", False)
+        or (
+            ph_input_data["inputph"].get("ldisp", False)
+            and ph_input_data["inputph"].get("fildvscf") is not None
+        )
+    )
 
     files_to_copy = {
         directory: [
