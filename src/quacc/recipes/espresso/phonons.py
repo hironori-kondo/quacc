@@ -448,9 +448,7 @@ def grid_phonon_flow(
         ph_input_data = Namelist(ph_input_data)
         ph_input_data.to_nested(binary="ph")
 
-        prev_outdir = ph_init_job_results["parameters"]["input_data"]["inputph"][
-            "outdir"
-        ]
+        prev_outdir = ph_init_job_results["dir_name"]
 
         grid_results = []
         for qnum, qdata in ph_init_job_results["results"].items():
