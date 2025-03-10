@@ -36,6 +36,7 @@ def bands_pw_job(
         | None
     ) = None,
     prev_outdir: SourceDirectory | None = None,
+    preset: str | None = "sssp_1.3.0_pbe_efficiency",
     make_bandpath: bool = True,
     line_density: float = 20,
     force_gamma: bool = True,
@@ -66,6 +67,10 @@ def bands_pw_job(
         The output directory of a previous calculation. If provided, Quantum Espresso
         will directly read the necessary files from this directory, eliminating the need
         to manually copy files. The directory will be ungzipped if necessary.
+    preset
+        The name of a YAML file containing a list of parameters to use as
+        a "preset" for the calculator. quacc will automatically look in the
+        `ESPRESSO_PRESET_DIR` (default: quacc/calculators/espresso/presets).
     make_bandpath
         If True, it returns the primitive cell for your structure and generates
         the high symmetry k-path using Latmer-Munro approach.
@@ -109,6 +114,7 @@ def bands_pw_job(
 
     return run_and_summarize(
         atoms,
+        preset=preset,
         template=EspressoTemplate("pw", test_run=test_run, outdir=prev_outdir),
         calc_defaults=calc_defaults,
         calc_swaps=calc_kwargs,
