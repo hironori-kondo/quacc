@@ -274,6 +274,7 @@ def prepare_copy_files(parameters: dict[str, Any], binary: str = "pw") -> list[P
     elif binary in {"ph", "phcg"}:
         to_copy.extend(pw_base)
         to_copy.append(Path("pwscf.save", "wfc*.*"))
+        to_copy.append(Path("pwscf.hess"))
 
         inputph = input_data.get("inputph", {})
         ldisp = inputph.get("ldisp", False)
@@ -335,6 +336,9 @@ def prepare_copy_files(parameters: dict[str, Any], binary: str = "pw") -> list[P
 
     elif binary == "postahc":
         to_copy.extend([Path("ahc_dir"), Path("matdyn.modes*")])
+
+    elif binary == "d3hess":
+        to_copy.append(Path("pwscf.xml"))
 
     return to_copy
 
