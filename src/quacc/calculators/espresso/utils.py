@@ -330,6 +330,9 @@ def prepare_copy_files(parameters: dict[str, Any], binary: str = "pw") -> list[P
     elif binary == "postahc":
         to_copy.extend([Path("ahc_dir"), Path("matdyn.modes*")])
 
+    elif binary == "d3hess":
+        to_copy.extend(Path("pwscf.xml"))
+
     return to_copy
 
 
