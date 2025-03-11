@@ -162,6 +162,7 @@ def espresso_prepare_dir(outdir: str | Path, binary: str = "pw") -> dict[str, An
                 "wpot_dir": Remove,
                 "dvscf_star%dir": Remove,
                 "drho_star%dir": Remove,
+                "dftd3_hess": Path(outdir) / "automatic.hess",
             }
         },
         "pp": {"inputpp": {"prefix": "pwscf", "filplot": "tmp.pp", "outdir": outdir}},
