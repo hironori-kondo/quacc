@@ -168,7 +168,6 @@ def espresso_prepare_dir(outdir: str | Path, binary: str = "pw") -> dict[str, An
                 "wpot_dir": Remove,
                 "dvscf_star%dir": Remove,
                 "drho_star%dir": Remove,
-                "dftd3_hess": Path(outdir) / "automatic.hess",
             }
         },
         "pp": {"inputpp": {"prefix": "pwscf", "filplot": "tmp.pp", "outdir": outdir}},
@@ -340,7 +339,7 @@ def prepare_copy_files(parameters: dict[str, Any], binary: str = "pw") -> list[P
         to_copy.extend([Path("ahc_dir"), Path("matdyn.modes*")])
 
     elif binary == "d3hess":
-        to_copy.append(Path("pwscf.xml*"))
+        to_copy.append(Path("pwscf.save","data-file-schema.xml*"))
 
     return to_copy
 
