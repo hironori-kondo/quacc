@@ -441,7 +441,7 @@ def d3hess_job(
 
     return run_and_summarize(
         template=EspressoTemplate("d3hess"),
-        calc_defaults=calc_defaults,
+        calc_defaults={},
         calc_swaps=calc_kwargs,
         additional_fields={"name": "d3hess.x post-processing"} | (additional_fields or {}),
         copy_files=copy_files,
