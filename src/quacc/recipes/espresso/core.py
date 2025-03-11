@@ -439,15 +439,6 @@ def d3hess_job(
         See the type-hint for the data structure.
     """
 
-    calc_defaults = {
-        "input_data": {
-            "input": {
-                "prefix": "pwscf",
-                "outdir": "./",
-                },
-        }
-    }
-
     return run_and_summarize(
         template=EspressoTemplate("d3hess"),
         calc_defaults=calc_defaults,

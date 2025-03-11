@@ -204,6 +204,7 @@ def espresso_prepare_dir(outdir: str | Path, binary: str = "pw") -> dict[str, An
             }
         },
         "postahc": {"input": {"ahc_dir": "ahc_dir/", "flvec": "matdyn.modes"}},
+        "d3hess": {"input": {"prefix": "pwscf", "outdir": outdir}},
     }
 
     return outkeys.get(binary, {})
