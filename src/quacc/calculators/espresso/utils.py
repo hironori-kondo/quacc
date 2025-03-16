@@ -203,7 +203,7 @@ def espresso_prepare_dir(outdir: str | Path, binary: str = "pw") -> dict[str, An
     return outkeys.get(binary, {})
 
 
-def prepare_copy_files(parameters: dict[str, Any], binary: str = "pw") -> list[Path]:
+def prepare_copy_files(parameters: dict[str, Any], binary: str = "pw") -> tuple[list[Path], list[tuple[str, str]] | None]:
     """
     Function that prepares the copy files for the espresso calculation.
 
@@ -218,6 +218,8 @@ def prepare_copy_files(parameters: dict[str, Any], binary: str = "pw") -> list[P
     -------
     list[Path]
         Paths to copy for the espresso calculation
+    list[tuple[str, str]]
+        List of regex renaming rules for files to copy.
     """
     to_copy = []
 
@@ -228,6 +230,8 @@ def prepare_copy_files(parameters: dict[str, Any], binary: str = "pw") -> list[P
     ]
 
     input_data = parameters.get("input_data", {})
+
+    rename_files = None
 
     if binary == "pw":
         control = input_data.get("control", {})
@@ -330,7 +334,7 @@ def prepare_copy_files(parameters: dict[str, Any], binary: str = "pw") -> list[P
     elif binary == "postahc":
         to_copy.extend([Path("ahc_dir"), Path("matdyn.modes*")])
 
-    return to_copy
+    return to_copy, rename_files
 
 
 def remove_conflicting_kpts_kspacing(

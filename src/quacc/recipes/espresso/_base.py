@@ -23,7 +23,7 @@ from quacc.schemas.ase import Summarize
 from quacc.utils.dicts import recursive_dict_merge
 
 if TYPE_CHECKING:
-    from typing import Any, Tuple
+    from typing import Any
 
     from quacc.types import Filenames, OptParams, RunSchema, SourceDirectory
 
@@ -240,7 +240,7 @@ def prepare_copy(
     ) = None,
     calc_params: dict[str, Any] | None = None,
     binary: str = "pw",
-) -> Tuple[dict[SourceDirectory, Filenames] | None, dict[Filenames, Filenames] | None]:
+) -> tuple[dict[SourceDirectory, Filenames] | None, list[tuple[str, str]] | None]:
     """
     Function that will prepare the files to copy.
 
@@ -257,8 +257,8 @@ def prepare_copy(
     -------
     dict
         Dictionary of files to copy.
-    dict
-        Dictionary of files to rename when copying.
+    list
+        List of regex renaming rules for files to copy.
     """
     if isinstance(copy_files, str | Path):
         copy_files = [copy_files]

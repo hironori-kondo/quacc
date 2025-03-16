@@ -121,14 +121,15 @@ def copy_decompress_files(
     When interfacing between different calculators, there may be different filenaming
     schemes for the output files. In such cases, you may want to rename the files
     being copied. You can achieve this by specifying a `rename_files` argument that
-    selectively changes the output filename:
+    specifies regex renaming rules for the files. For example, to copy file "DYN0" and
+    "DYN1" while renaming them to "DYN_0" and "DYN_1", use the following:
 
     ```python
     copy_decompress_files(
         source_directory="/path/to/source",
-        filenames=["CHGCAR", "WAVECAR"],
+        filenames=["DYN0", "DYN1"],
         destination="/path/to/destination",
-        rename_files={"CHGCAR": "CHGCAR_RENAMED"}
+        rename_files=[(r'^(DYN)(\d+)$', r'\1_\2')]
     )
     ``` 
 
@@ -141,7 +142,7 @@ def copy_decompress_files(
     destination_directory
         Destination directory.
     rename_files
-        Keyword argument for the files to rename when copying.
+        List of regex renaming rules for files to copy.
 
     Returns
     -------

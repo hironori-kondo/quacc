@@ -28,12 +28,12 @@ class BaseRunner:
     copy_files
         Files to copy to runtime directory.
     rename_files
-        Keyword argument for the files to rename when copying.
+        List of regex renaming rules for files to copy.
     """
 
     atoms: Atoms | None = None
     copy_files: SourceDirectory | dict[SourceDirectory, Filenames] | None = None
-    rename_files: dict[str | Path, str | Path] | None = None
+    rename_files: list[tuple[str, str]] | None = None
 
     def setup(self) -> None:
         """
