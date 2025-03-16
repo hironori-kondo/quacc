@@ -82,7 +82,7 @@ def run_and_summarize(
         calc_swaps=calc_swaps,
     )
 
-    updated_copy_files = prepare_copy(
+    updated_copy_files, rename_files = prepare_copy(
         copy_files=copy_files,
         calc_params=calc.user_calc_params,
         binary=calc.template.binary,
@@ -90,7 +90,7 @@ def run_and_summarize(
 
     geom_file = template.outputname if template and template.binary == "pw" else None
 
-    final_atoms = Runner(atoms, calc, copy_files=updated_copy_files).run_calc(
+    final_atoms = Runner(atoms, calc, copy_files=updated_copy_files, rename_files=rename_files).run_calc(
         geom_file=geom_file
     )
 
@@ -262,7 +262,7 @@ def prepare_copy(
         copy_files = [copy_files]
 
     if isinstance(copy_files, list):
-        exact_files_to_copy = prepare_copy_files(calc_params, binary=binary)
-        return {source: exact_files_to_copy for source in copy_files}
+        exact_files_to_copy, files_to_rename = prepare_copy_files(calc_params, binary=binary)
+        return {source: exact_files_to_copy for source in copy_files}, files_to_rename
 
     return copy_files
