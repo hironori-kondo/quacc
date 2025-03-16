@@ -334,6 +334,28 @@ def prepare_copy_files(parameters: dict[str, Any], binary: str = "pw") -> tuple[
     elif binary == "postahc":
         to_copy.extend([Path("ahc_dir"), Path("matdyn.modes*")])
 
+    elif binary == "epw":
+        to_copy.extend(pw_base)
+        to_copy.append(Path("pwscf.save", "wfc*.*"))
+        #to_copy.append(Path("pwscf.hess*"))
+
+        to_copy.extend(
+            [
+                Path("matdyn*"),
+                Path("_ph*", "pwscf.phsave"),
+                Path("_ph*", "pwscf.dvscf*"),
+                Path("_ph*", "pwscf.q_*", "pwscf.dvscf*"),
+                Path("q2r.fc*"),
+            ]
+        )
+        rename_files = [
+            (r"^matdyn(\d+)(\.gz)?$", r"save/pwscf.dyn_q\1\2"),
+            (r"^_ph0/pwscf\.phsave$", r"save/pwscf.phsave"),
+            (r"^_ph0/pwscf\.dvscf(_paw)?(?:1)?(\.gz)?$", r"save/pwscf.dvscf\1_q1\2"),
+            (r"^_ph0/pwscf\.q_(\d+)/pwscf\.dvscf(_paw)?(?:1)?(\.gz)?$", r"save/pwscf.dvscf\2_q\1\3"),
+            (r"^q2r\.fc(\.gz)?$", r"save/ifc.q2r\1"),
+        ]
+
     return to_copy, rename_files
 
 
