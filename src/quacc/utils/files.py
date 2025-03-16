@@ -59,6 +59,7 @@ def copy_decompress_files(
     source_directory: SourceDirectory,
     filenames: Filenames,
     destination_directory: str | Path,
+    rename_files: dict[str | Path, str | Path] | None = None,
 ) -> None:
     """
     Copy and decompress `filenames` from the `source_directory` to the `destination`
@@ -117,6 +118,20 @@ def copy_decompress_files(
     )
     ```
 
+    When interfacing between different calculators, there may be different filenaming
+    schemes for the output files. In such cases, you may want to rename the files
+    being copied. You can achieve this by specifying a `rename_files` argument that
+    selectively changes the output filename:
+
+    ```python
+    copy_decompress_files(
+        source_directory="/path/to/source",
+        filenames=["CHGCAR", "WAVECAR"],
+        destination="/path/to/destination",
+        rename_files={"CHGCAR": "CHGCAR_RENAMED"}
+    )
+    ``` 
+
     Parameters
     ----------
     source_directory
@@ -125,6 +140,8 @@ def copy_decompress_files(
         Files to copy and decompress. Glob patterns are supported.
     destination_directory
         Destination directory.
+    rename_files
+        Keyword argument for the files to rename when copying.
 
     Returns
     -------
@@ -144,6 +161,10 @@ def copy_decompress_files(
             destination_filepath = destination_directory / source_filepath.relative_to(
                 source_directory
             )
+
+            if rename_files is not None and source_filepath.name in rename_files:
+                destination_filepath = destination_filepath.parent / rename_files[source_filepath.name]
+
             Path(destination_filepath.parent).mkdir(parents=True, exist_ok=True)
 
             if source_filepath.is_symlink():
