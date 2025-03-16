@@ -5,6 +5,7 @@ from __future__ import annotations
 import contextlib
 import os
 import socket
+import re
 from copy import deepcopy
 from datetime import datetime, timezone
 from logging import getLogger
@@ -59,6 +60,7 @@ def copy_decompress_files(
     source_directory: SourceDirectory,
     filenames: Filenames,
     destination_directory: str | Path,
+    rename_files: list[tuple[str, str]] | None = None,
 ) -> None:
     """
     Copy and decompress `filenames` from the `source_directory` to the `destination`
@@ -117,6 +119,21 @@ def copy_decompress_files(
     )
     ```
 
+    When interfacing between different calculators, there may be different filenaming
+    schemes for the output files. In such cases, you may want to rename the files
+    being copied. You can achieve this by specifying a `rename_files` argument that
+    specifies regex renaming rules for the files. For example, to copy file "DYN0" and
+    "DYN1" while renaming them to "DYN_0" and "DYN_1", use the following:
+
+    ```python
+    copy_decompress_files(
+        source_directory="/path/to/source",
+        filenames=["DYN0", "DYN1"],
+        destination="/path/to/destination",
+        rename_files=[(r'^(DYN)(\d+)$', r'\1_\2')]
+    )
+    ``` 
+
     Parameters
     ----------
     source_directory
@@ -125,6 +142,8 @@ def copy_decompress_files(
         Files to copy and decompress. Glob patterns are supported.
     destination_directory
         Destination directory.
+    rename_files
+        List of regex renaming rules for files to copy.
 
     Returns
     -------
@@ -141,9 +160,16 @@ def copy_decompress_files(
         if not globs_found:
             LOGGER.warning(f"Cannot find file {f} in {source_directory}")
         for source_filepath in globs_found:
-            destination_filepath = destination_directory / source_filepath.relative_to(
-                source_directory
-            )
+            relative_path = str(source_filepath.relative_to(source_directory))
+
+            if rename_files:
+                for source, replacement in rename_files:
+                    renamed_path = re.sub(source, replacement, relative_path)
+                    if renamed_path != relative_path:
+                        relative_path = renamed_path
+                        break
+
+            destination_filepath = destination_directory / relative_path
             Path(destination_filepath.parent).mkdir(parents=True, exist_ok=True)
 
             if source_filepath.is_symlink():

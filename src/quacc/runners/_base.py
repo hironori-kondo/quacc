@@ -5,6 +5,7 @@ Base class for runners.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from quacc.runners.prep import calc_cleanup, calc_setup
@@ -26,10 +27,13 @@ class BaseRunner:
         Atoms object with calculator attached (or no Atoms object at all).
     copy_files
         Files to copy to runtime directory.
+    rename_files
+        List of regex renaming rules for files to copy.
     """
 
     atoms: Atoms | None = None
     copy_files: SourceDirectory | dict[SourceDirectory, Filenames] | None = None
+    rename_files: list[tuple[str, str]] | None = None
 
     def setup(self) -> None:
         """
@@ -40,7 +44,7 @@ class BaseRunner:
         None
         """
         self.tmpdir, self.job_results_dir = calc_setup(
-            self.atoms, copy_files=self.copy_files
+            self.atoms, copy_files=self.copy_files, rename_files=self.rename_files
         )
 
     def cleanup(self) -> None:

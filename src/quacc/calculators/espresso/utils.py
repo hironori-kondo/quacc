@@ -211,7 +211,7 @@ def espresso_prepare_dir(outdir: str | Path, binary: str = "pw") -> dict[str, An
     return outkeys.get(binary, {})
 
 
-def prepare_copy_files(parameters: dict[str, Any], binary: str = "pw") -> list[Path]:
+def prepare_copy_files(parameters: dict[str, Any], binary: str = "pw") -> tuple[list[Path], list[tuple[str, str]] | None]:
     """
     Function that prepares the copy files for the espresso calculation.
 
@@ -226,6 +226,8 @@ def prepare_copy_files(parameters: dict[str, Any], binary: str = "pw") -> list[P
     -------
     list[Path]
         Paths to copy for the espresso calculation
+    list[tuple[str, str]]
+        List of regex renaming rules for files to copy.
     """
     to_copy = []
 
@@ -236,6 +238,8 @@ def prepare_copy_files(parameters: dict[str, Any], binary: str = "pw") -> list[P
     ]
 
     input_data = parameters.get("input_data", {})
+
+    rename_files = None
 
     if binary == "pw":
         control = input_data.get("control", {})
@@ -342,7 +346,29 @@ def prepare_copy_files(parameters: dict[str, Any], binary: str = "pw") -> list[P
     elif binary == "d3hess":
         to_copy.extend(pw_base)
 
-    return to_copy
+    elif binary == "epw":
+        to_copy.extend(pw_base)
+        to_copy.append(Path("pwscf.save", "wfc*.*"))
+        #to_copy.append(Path("pwscf.hess*"))
+
+        to_copy.extend(
+            [
+                Path("matdyn*"),
+                Path("_ph*", "pwscf.phsave"),
+                Path("_ph*", "pwscf.dvscf*"),
+                Path("_ph*", "pwscf.q_*", "pwscf.dvscf*"),
+                Path("q2r.fc*"),
+            ]
+        )
+        rename_files = [
+            (r"^matdyn(\d+)(\.gz)?$", r"save/pwscf.dyn_q\1\2"),
+            (r"^_ph0/pwscf\.phsave$", r"save/pwscf.phsave"),
+            (r"^_ph0/pwscf\.dvscf(_paw)?(?:1)?(\.gz)?$", r"save/pwscf.dvscf\1_q1\2"),
+            (r"^_ph0/pwscf\.q_(\d+)/pwscf\.dvscf(_paw)?(?:1)?(\.gz)?$", r"save/pwscf.dvscf\2_q\1\3"),
+            (r"^q2r\.fc(\.gz)?$", r"save/ifc.q2r\1"),
+        ]
+
+    return to_copy, rename_files
 
 
 def remove_conflicting_kpts_kspacing(
