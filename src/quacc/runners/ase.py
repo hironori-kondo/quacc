@@ -61,6 +61,7 @@ class Runner(BaseRunner):
         atoms: Atoms,
         calculator: Calculator,
         copy_files: SourceDirectory | dict[SourceDirectory, Filenames] | None = None,
+        rename_files: dict[str | Path, str | Path] | None = None,
     ) -> None:
         """
         Initialize the Runner object.
@@ -73,6 +74,8 @@ class Runner(BaseRunner):
             The instantiated ASE calculator object to attach to the Atoms object.
         copy_files
             Files to copy (and decompress) from source to the runtime directory.
+        rename_files
+            Keyword argument for the files to rename when copying.
 
         Returns
         -------
@@ -81,6 +84,7 @@ class Runner(BaseRunner):
         self.atoms = copy_atoms(atoms)
         self.atoms.calc = calculator
         self.copy_files = copy_files
+        self.rename_files = rename_files
         self.setup()
 
     def run_calc(
