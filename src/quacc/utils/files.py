@@ -59,7 +59,7 @@ def copy_decompress_files(
     source_directory: SourceDirectory,
     filenames: Filenames,
     destination_directory: str | Path,
-    rename_files: dict[str | Path, str | Path] | None = None,
+    rename_files: list[tuple[str, str]] | None = None,
 ) -> None:
     """
     Copy and decompress `filenames` from the `source_directory` to the `destination`
