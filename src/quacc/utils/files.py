@@ -5,6 +5,7 @@ from __future__ import annotations
 import contextlib
 import os
 import socket
+import re
 from copy import deepcopy
 from datetime import datetime, timezone
 from logging import getLogger
@@ -159,13 +160,16 @@ def copy_decompress_files(
         if not globs_found:
             LOGGER.warning(f"Cannot find file {f} in {source_directory}")
         for source_filepath in globs_found:
-            destination_filepath = destination_directory / source_filepath.relative_to(
-                source_directory
-            )
+            relative_path = str(source_filepath.relative_to(source_directory))
 
-            if rename_files is not None and source_filepath.name in rename_files:
-                destination_filepath = destination_filepath.parent / rename_files[source_filepath.name]
+            if rename_files:
+                for source, replacement in rename_files:
+                    renamed_path = re.sub(source, replacement, relative_path)
+                    if renamed_path != relative_path:
+                        relative_path = renamed_path
+                        break
 
+            destination_filepath = destination_directory / relative_path
             Path(destination_filepath.parent).mkdir(parents=True, exist_ok=True)
 
             if source_filepath.is_symlink():
