@@ -24,6 +24,7 @@ LOGGER = getLogger(__name__)
 def calc_setup(
     atoms: Atoms | None,
     copy_files: SourceDirectory | dict[SourceDirectory, Filenames] | None = None,
+    rename_files: dict[str | Path, str | Path] | None = None,
 ) -> tuple[Path, Path]:
     """
     Perform staging operations for a calculation, including copying files to the scratch
@@ -37,6 +38,8 @@ def calc_setup(
         attached. If None, no modifications to the calculator's directory will be made.
     copy_files
         Files to copy (and decompress) from source to the runtime directory.
+    rename_files
+        Keyword argument for the files to rename when copying.
 
     Returns
     -------
@@ -79,7 +82,7 @@ def calc_setup(
 
         for source_directory, filenames in copy_files.items():
             if source_directory is not None:
-                copy_decompress_files(source_directory, filenames, tmpdir)
+                copy_decompress_files(source_directory, filenames, tmpdir, rename_files)
 
     return tmpdir, job_results_dir
 
