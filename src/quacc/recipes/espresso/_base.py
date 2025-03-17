@@ -267,4 +267,4 @@ def prepare_copy(
         exact_files_to_copy, files_to_rename = prepare_copy_files(calc_params, binary=binary)
         return {source: exact_files_to_copy for source in copy_files}, files_to_rename
 
-    return copy_files
+    return copy_files, None
