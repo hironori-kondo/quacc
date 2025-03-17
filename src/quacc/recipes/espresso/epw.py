@@ -55,9 +55,23 @@ def epw_job(
         Dictionary of results from [quacc.schemas.ase.Summarize.run][].
         See the type-hint for the data structure.
     """
+
+    calc_defaults = {
+        "input_data": {
+            "inputepw": {
+                "elph": True,
+                "epbwrite": True,
+                "epbread": False,
+                "epwwrite": True,
+                "epwread": False,
+                "wannierize": True,
+            },
+        }
+    }
+    
     return run_and_summarize(
         template=EspressoTemplate("epw"),
-        calc_defaults={},
+        calc_defaults=calc_defaults,
         calc_swaps=calc_kwargs,
         additional_fields={"name": "epw.x Electron-Phonon"} | (additional_fields or {}),
         copy_files=copy_files,
