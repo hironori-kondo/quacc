@@ -160,7 +160,7 @@ def run_and_summarize_opt(
         calc_swaps=calc_swaps,
     )
 
-    updated_copy_files = prepare_copy(
+    updated_copy_files, rename_files = prepare_copy(
         copy_files=copy_files,
         calc_params=calc.user_calc_params,
         binary=calc.template.binary,
