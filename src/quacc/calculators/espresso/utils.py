@@ -202,7 +202,7 @@ def espresso_prepare_dir(outdir: str | Path, binary: str = "pw") -> dict[str, An
             "inputepw": {
                 "prefix": "pwscf",
                 "outdir": outdir,
-                "dvscf_dir": "./save"
+                "dvscf_dir": f"{outdir}/save"
             }
         }
     }
