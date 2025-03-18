@@ -25,6 +25,7 @@ def epw_job(
     copy_files: (
         SourceDirectory | list[SourceDirectory] | dict[SourceDirectory, Filenames]
     ),
+    prev_outdir: SourceDirectory | None = None,
     additional_fields: dict[str, Any] | None = None,
     **calc_kwargs,
 ) -> RunSchema:
@@ -70,7 +71,7 @@ def epw_job(
     }
     
     return run_and_summarize(
-        template=EspressoTemplate("epw"),
+        template=EspressoTemplate("epw", outdir=prev_outdir),
         calc_defaults=calc_defaults,
         calc_swaps=calc_kwargs,
         additional_fields={"name": "epw.x Electron-Phonon"} | (additional_fields or {}),
